@@ -230,9 +230,12 @@ installHelpers.getLatestFrameworkVersion(function(error, latestFrameworkTag) {
 
 function generatePromptOverrides() {
   if(USE_CONFIG) {
-    var configJson = require('./conf/config.json');
-    var configData = JSON.parse(JSON.stringify(configJson).replace('true', '"y"').replace('false', '"n"'));
-    configData.install = 'y';
+    try {
+      var configData = require('./conf/config.json');
+      configData.install = true;
+    } catch(e) {
+      return exit(1, e.message);
+    }
   }
   // NOTE config.json < cmd args
   return _.extend({}, configData, optimist.argv);

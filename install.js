@@ -35,6 +35,7 @@ installHelpers.getLatestFrameworkVersion(function(error, latestFrameworkTag) {
       name: 'useJSON',
       description: 'Use existing config values? y/N',
       type: 'string',
+      conform: installHelpers.inputHelpers.booleanValidator,
       before: installHelpers.inputHelpers.toBoolean,
       default: 'N'
     },
@@ -42,6 +43,7 @@ installHelpers.getLatestFrameworkVersion(function(error, latestFrameworkTag) {
       name: 'install',
       description: 'Continue? Y/n',
       type: 'string',
+      conform: installHelpers.inputHelpers.booleanValidator,
       before: installHelpers.inputHelpers.toBoolean,
       default: 'Y'
     },
@@ -115,16 +117,18 @@ installHelpers.getLatestFrameworkVersion(function(error, latestFrameworkTag) {
     features: {
       ffmpeg: {
         name: 'useffmpeg',
-        type: 'string',
         description: "Are you using ffmpeg? y/N",
+        type: 'string',
+        conform: installHelpers.inputHelpers.booleanValidator,
         before: installHelpers.inputHelpers.toBoolean,
         default: 'N'
       },
       smtp: {
         confirm: {
           name: 'useSmtp',
-          type: 'string',
           description: "Will you be using an SMTP server? (used for sending emails) y/N",
+          type: 'string',
+          conform: installHelpers.inputHelpers.booleanValidator,
           before: installHelpers.inputHelpers.toBoolean,
           default: 'N'
         },
@@ -183,6 +187,8 @@ installHelpers.getLatestFrameworkVersion(function(error, latestFrameworkTag) {
     tenantDelete: {
       name: "confirm",
       description: "Continue? (Y/n)",
+      type: 'string',
+      conform: installHelpers.inputHelpers.booleanValidator,
       before: installHelpers.inputHelpers.toBoolean,
       default: "Y"
     },
@@ -229,6 +235,7 @@ installHelpers.getLatestFrameworkVersion(function(error, latestFrameworkTag) {
 });
 
 function generatePromptOverrides() {
+  console.log('USE_CONFIG:', USE_CONFIG);
   if(USE_CONFIG) {
     try {
       var configData = require('./conf/config.json');
@@ -244,6 +251,7 @@ function generatePromptOverrides() {
 function start() {
   // set overrides from command line arguments and config.json
   prompt.override = generatePromptOverrides();
+  console.log(prompt.override);
   // Prompt the user to begin the install
   if(!IS_INTERACTIVE || USE_CONFIG) {
     console.log('This script will install the application. Please wait ...');
@@ -257,6 +265,9 @@ function start() {
     async.series([
       configureServer,
       configureFeatures,
+      function(cb) {
+        return cb('forced exit');
+      },
       configureMasterTenant,
       createMasterTenant,
       createSuperUser,
